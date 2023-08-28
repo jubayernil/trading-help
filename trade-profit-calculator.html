@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Strategy Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #EDF4E0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* To center the container vertically */
+            padding: 2% 0;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 50%;
+            background-color: #05396B;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        label {
+            flex: 1;
+            margin-right: 10px;
+            padding: 10px 0;
+            font-size: 1rem;
+            color: #EDF4E0; /* Using the lightest color for contrast against the deep navy background */
+        }
+
+        input {
+            flex: 2;
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #389583;
+            border-radius: 8px;
+            background-color: #8DE4AF; /* Very light green */
+            color: #05396B; /* Deep navy text for contrast */
+        }
+
+        input:focus {
+            border-color: #5CDB94;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(92, 219, 148, 0.2);
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #5CDB94; /* Light green */
+            color: #05396B; /* Deep navy text */
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #389583; /* Teal color */
+            color: #EDF4E0;
+        }
+
+        .results-container {
+            max-height: 50vh;
+            overflow: auto;
+            margin-top: 20px;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .results-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #389583; /* Teal color */
+            text-align: center;
+            background-color: #8DE4AF; /* Very light green */
+            color: #05396B; /* Deep navy */
+        }
+
+        th {
+            background-color: #5CDB94; /* Light green */
+            color: #05396B; /* Deep navy text */
+        }
+
+        td.profit {
+            color: #389583; /* Teal color */
+        }
+
+        td.loss {
+            color: #EDF4E0; /* Lightest color for contrast */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="input-row">
+            <label for="accountBalance">Account Balance:</label>
+            <input type="number" id="accountBalance" step="0.01" placeholder="1000.00">
+        </div>
+
+        <div class="input-row">
+            <label for="baseInvestment">Initial Investment Per Trade:</label>
+            <input type="number" id="baseInvestment" step="0.01" placeholder="100.00">
+        </div>
+
+        <div class="input-row">
+            <label for="tradeCount">Worst Case Number of Trades:</label>
+            <input type="number" id="tradeCount" min="1" placeholder="5">
+        </div>
+
+        <button onclick="calculate()">Calculate</button>
+
+        <div class="results-container" id="results"></div>
+    </div>
+
+    <script>
+        function calculate() {
+            const accountBalance = parseFloat(document.getElementById('accountBalance').value);
+            const baseInvestment = parseFloat(document.getElementById('baseInvestment').value);
+            const tradeCount = parseInt(document.getElementById('tradeCount').value);
+
+            let cumulativeLoss = 0;
+            let currentInvestment = baseInvestment;
+            let output = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Trade No.</th>
+                        <th>Investment</th>
+                        <th>Potential Profit</th>
+                        <th>Potential Loss</th>
+                        <th>Cumulative Loss</th>
+                        <th>Cumulative Loss %</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+            for (let i = 1; i <= tradeCount; i++) {
+                const potentialWin = currentInvestment * 2;
+                cumulativeLoss += currentInvestment;
+
+                output += `
+                <tr>
+                    <td>${ordinal(i)}</td>
+                    <td>$${currentInvestment.toFixed(2)}</td>
+                    <td class="profit">+ $${potentialWin.toFixed(2)}</td>
+                    <td class="loss">- $${currentInvestment.toFixed(2)}</td>
+                    <td class="loss">- $${cumulativeLoss.toFixed(2)}</td>
+                    <td class="loss">${((cumulativeLoss / accountBalance) * 100).toFixed(2)}%</td>
+                </tr>`;
+
+                if (i !== 4) {
+                    currentInvestment += baseInvestment;
+                } else {
+                    currentInvestment += baseInvestment * 2;
+                }
+            }
+
+            output += `</tbody></table>`;
+            document.getElementById('results').innerHTML = output;
+        }
+
+        function ordinal(n) {
+            const s = ["th", "st", "nd", "rd"];
+            const v = n % 100;
+            return n + (s[(v - 20) % 10] || s[v] || s[0]);
+        }
+    </script>
+</body>
+
+</html>
